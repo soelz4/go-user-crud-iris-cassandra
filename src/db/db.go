@@ -11,7 +11,7 @@ import (
 // Database (Cassandra) Session
 var db_session *gocql.Session
 
-func Connect() {
+func Init() *gocql.ClusterConfig {
 	cluster := gocql.NewCluster(
 		"127.0.0.1",
 	) // Use "Cassandra Container Name" if Connecting via Docker Compose Service Name
@@ -20,6 +20,12 @@ func Connect() {
 	cluster.Consistency = gocql.Quorum
 	cluster.Timeout = 2 * time.Second
 
+	// Return Cluster
+	return cluster
+}
+
+func Connect() {
+	cluster := Init()
 	// Create a New Session
 	session, err := cluster.CreateSession()
 	if err != nil {
@@ -33,4 +39,8 @@ func Connect() {
 
 func GetSession() *gocql.Session {
 	return db_session
+}
+
+func Close() {
+	db_session.Close()
 }

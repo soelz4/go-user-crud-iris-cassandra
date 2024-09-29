@@ -10,8 +10,10 @@ import (
 
 func main() {
 	// DataBase
+	db.Init()
 	db.Connect()
 	db_session := db.GetSession()
+	// defer db.Close()
 
 	// Server
 	server := server.NewServer(fmt.Sprintf(":%s", "9010"), db_session)
