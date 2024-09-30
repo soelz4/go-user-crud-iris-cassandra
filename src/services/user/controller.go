@@ -1,6 +1,8 @@
 package user
 
 import (
+	"fmt"
+
 	"github.com/gocql/gocql"
 	"github.com/kataras/iris/v12"
 
@@ -14,7 +16,7 @@ func (h *userHandler) getUser(ctx iris.Context) {
 	// Error Handling
 	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.JSON(iris.Map{"error": "Invalid user ID"})
+		ctx.JSON(iris.Map{"error": "Invalid User ID"})
 		return
 	}
 
@@ -23,7 +25,7 @@ func (h *userHandler) getUser(ctx iris.Context) {
 		Scan(&user.ID, &user.Name, &user.Email, &user.Phone)
 	if err != nil {
 		ctx.StatusCode(iris.StatusNotFound)
-		ctx.JSON(iris.Map{"error": "User not found"})
+		ctx.JSON(iris.Map{"error": "User Not Found"})
 		return
 	}
 
@@ -45,7 +47,7 @@ func (h *userHandler) listUsers(ctx iris.Context) {
 	err := iter.Close()
 	if err != nil {
 		ctx.StatusCode(iris.StatusInternalServerError)
-		ctx.JSON(iris.Map{"error": "Failed to fetch users"})
+		ctx.JSON(iris.Map{"error": "Failed to Fetch Users"})
 		return
 	}
 
@@ -56,7 +58,25 @@ func (h *userHandler) listUsers(ctx iris.Context) {
 func (h *userHandler) createUser(ctx iris.Context) {
 }
 
+// DeleteUser handles DELETE /users/{id}
 func (h *userHandler) deleteUser(ctx iris.Context) {
+	id := ctx.Params().Get("id")
+	userID, err := gocql.ParseUUID(id)
+	// Error Handling
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.JSON(iris.Map{"error": "Invalid User ID"})
+		return
+	}
+
+	err = h.store.db_session.Query("DELETE FROM users WHERE id = ?", userID).Exec()
+	if err != nil {
+		ctx.StatusCode(iris.StatusInternalServerError)
+		ctx.JSON(iris.Map{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(iris.Map{"message": fmt.Sprintf("User with ID=%v Deleted", userID)})
 }
 
 func (h *userHandler) updateUser(ctx iris.Context) {
