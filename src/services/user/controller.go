@@ -102,5 +102,38 @@ func (h *userHandler) deleteUser(ctx iris.Context) {
 	ctx.JSON(iris.Map{"message": fmt.Sprintf("User with ID=%v Deleted", userID)})
 }
 
+// UpdateUser handles PUT /users/{id}
 func (h *userHandler) updateUser(ctx iris.Context) {
+	id := ctx.Params().Get("id")
+	userID, err := gocql.ParseUUID(id)
+	// Error Handling
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.JSON(iris.Map{"error": "Invalid User ID"})
+		return
+	}
+
+	var user types.User
+
+	err = ctx.ReadJSON(&user)
+	// Error Handling
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.JSON(iris.Map{"error": "Invalid Input"})
+		return
+	}
+
+	err = h.store.db_session.Query("UPDATE users SET name = ?, email = ?, phone = ? WHERE id = ?",
+		user.Name, user.Email, user.Phone, userID).Exec()
+	if err != nil {
+		ctx.StatusCode(iris.StatusInternalServerError)
+		ctx.JSON(iris.Map{"error": err.Error()})
+		return
+	}
+
+	// Set User ID
+	user.ID = userID
+
+	// JSON
+	ctx.JSON(iris.Map{"message": fmt.Sprintf("User with ID=%v Updated", user.ID)})
 }
