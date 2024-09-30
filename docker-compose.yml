@@ -1,0 +1,26 @@
+services:
+  golang-api:
+    container_name: golang-api
+    image: soelz/go-user-crud-iris-cassandra:0.1
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    init: true
+    depends_on:
+      - cassandra
+    networks:
+      - backend
+    ports:
+      - 9010:9010
+    restart: unless-stopped
+  cassandra:
+    container_name: cassandra
+    image: cassandra:4.1
+    networks:
+      - backend
+    ports:
+      - 9042:9042
+networks:
+  backend:
+    name: backend
+    external: true
