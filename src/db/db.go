@@ -16,7 +16,7 @@ func Init() *gocql.ClusterConfig {
 		"127.0.0.1",
 	) // Use "Cassandra Container Name" if Connecting via Docker Compose Service Name
 	cluster.Port = 9042
-	cluster.Keyspace = "system" // Built-in Keyspace
+	cluster.Keyspace = "userdb" // Keyspace
 	cluster.Consistency = gocql.Quorum
 	cluster.Timeout = 2 * time.Second
 
