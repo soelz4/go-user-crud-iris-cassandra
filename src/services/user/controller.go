@@ -55,7 +55,30 @@ func (h *userHandler) listUsers(ctx iris.Context) {
 	ctx.JSON(users)
 }
 
+// CreateUser handles POST /users
 func (h *userHandler) createUser(ctx iris.Context) {
+	// Read JSON and Put into the User Structure
+	var user types.User
+	err := ctx.ReadJSON(&user)
+	// Error Handling
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.JSON(iris.Map{"error": "Invalid Input"})
+		return
+	}
+
+	user.ID = gocql.TimeUUID()
+
+	err = h.store.db_session.Query("INSERT INTO users (id, name, email, phone) VALUES (?, ?, ?, ?)",
+		user.ID, user.Name, user.Email, user.Phone).Exec()
+	if err != nil {
+		ctx.StatusCode(iris.StatusInternalServerError)
+		ctx.JSON(iris.Map{"error": err.Error()})
+		return
+	}
+
+	ctx.StatusCode(iris.StatusCreated)
+	ctx.JSON(iris.Map{"message": fmt.Sprintf("User with ID=%v Created", user.ID)})
 }
 
 // DeleteUser handles DELETE /users/{id}
