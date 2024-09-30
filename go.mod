@@ -1,6 +1,6 @@
 module go-user-crud-iris-cassandra
 
-go 1.23.0
+go 1.22.0
 
 require (
 	github.com/BurntSushi/toml v1.3.2 // indirect
