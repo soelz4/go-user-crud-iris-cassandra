@@ -13,7 +13,7 @@ var db_session *gocql.Session
 
 func Init() *gocql.ClusterConfig {
 	cluster := gocql.NewCluster(
-		"127.0.0.1",
+		"cassandra",
 	) // Use "Cassandra Container Name" if Connecting via Docker Compose Service Name
 	cluster.Port = 9042
 	cluster.Keyspace = "userdb" // Keyspace
